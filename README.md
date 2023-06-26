@@ -12,42 +12,81 @@
 
 ## DESCRIPCIÓN
 
-Este parcial trata sobre un acensor en el cual informa en el piso que estamos, si esta parado o no con unos les y sus tres botones cada uno es para subir, bajar y parar el acensor <br/>
-Tambien tiene una luz de emergencias si es de noche, y luego una cabina de aire que se puede abir dependiendo la como queramos <br/>
+Este parcial trata sobre un alerta de incendios <br/>
+Tambien tiene unos leds de emerjencias agregados al momento de detectar mucha temperatura<br/>
 
 ## FUNCIÓN PRINCIPAL
 
-La función principal se encarga de elevar, parar y subir el acensor <br/>
-Tambien tiene unos leds los cuales dicen el estado de funcionamiento del acensor  <br/>
-luego una luz que prende de noche y una cabina para que ingrese aire segun queramos<br/>
+La función principal se encarga de detectar las temperaturas y decir en que estapa del año se encuentra<br/>
+Tambien tiene unos leds los cuales titilan en alerta si detectan mucha temperatura, y dice alerta en el LCD <br/>
+Luego tenemos un servo que gira al momento de detectar temperatura alta<br/>
 //Thomas Szymuda 1D
-//Primer Parcial
+//Segundo Parcial
 void loop()
 {
-  //Cabina aire
-  cabina_aire();
-  //Luz de noche de emergencia
-  emergencia();
-  
-  //Botones
-  int boton_sube;
-  boton_sube = digitalRead(BOTON_SUBIR);
-  
-  int boton_bajar;
-  boton_bajar = digitalRead(BOTON_BAJAR); 
-  
-  int boton_pausar;
-  boton_pausar = digitalRead(BOTON_PARAR);
-  
-  //piso
-  Serial.print("Piso: ");    
-  Serial.println(numero_piso);
-  //Encendido
-  encender_piso(numero_piso);
-  //ESTADO ACENSOR
-  estado_acensor(boton_pausar, boton_sube, boton_bajar, 0, 9);
-  //Delay y estado de leds
-  leds_estado_acensor();
+  if (prendido_apagado)
+  {
+    int lectura_sensor = analogRead(sensor_temperatura);
+    //Temperatura a numero entero
+    float temperatura_ambiente = (lectura_sensor * 5.0 / 1024.0 - 0.5) * 100.0;
+	
+    //Configuracion del lcd columna x fila y printeo de temperatura
+    lcd.setCursor(0, 0);
+    lcd.print("Temperatura: ");
+    lcd.print(temperatura_ambiente);
+    delay(500);
+
+    //Estaciones
+    detectar_estacion(temperatura_ambiente);
+
+    //Temperatura
+    if (temperatura_ambiente > 60)
+    {
+      mover_servo();
+      ALERTA(led_roja,led_amarilla);
+    }
+    else
+    {
+      frenar_servo();
+    }
+	//Funcionalidad al precionar boton
+    if (IrReceiver.decode()) 
+    {
+      Serial.println(IrReceiver.decodedIRData.decodedRawData, HEX);
+      IrReceiver.resume();
+      switch (IrReceiver.decodedIRData.decodedRawData)
+      {
+        //Numero de pin presionado pasado a numero
+        case 4278238976:
+          prendido_apagado = false;
+        //Inicializamos el LCD sin texto
+          lcd.setCursor(0, 0);
+          lcd.print("                ");
+          lcd.setCursor(0, 1);
+          lcd.print("                ");
+          break;
+      }
+      delay(50);
+      //Reanuda Señales
+      irrecv.resume();
+    }
+  }
+  else
+  {
+    if (IrReceiver.decode()) 
+    {
+        Serial.println(IrReceiver.decodedIRData.decodedRawData, HEX);
+        IrReceiver.resume();
+        switch (IrReceiver.decodedIRData.decodedRawData)
+        {
+            case 4278238976:
+              prendido_apagado = true;
+              break;
+        }
+        delay(50);
+        irrecv.resume();
+    }
+  }
 }
 
 
