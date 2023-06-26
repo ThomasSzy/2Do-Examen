@@ -1,0 +1,175 @@
+//Thomas Szymuda 1D 2Do Examen
+#include <Servo.h>
+//LCD
+#include <LiquidCrystal.h>
+//Señal IR
+#include <IRremote.h>
+//Leds
+#define led_roja A2
+#define led_amarilla A3
+//Sensor temperatura
+#define sensor_temperatura A0
+#define sensor_ir 13
+//Tecla Off
+#define tecla_on_off 0xFF00BF00
+//Declaramos servo
+Servo myservo;
+//Posicion de servo
+int posicion;
+int temperatura_ambiente;
+
+int lectura_sensor;
+//Inicializamos en false para que este apagado
+bool prendido_apagado = false;
+
+IRrecv irrecv(sensor_ir);
+decode_results Valor;
+
+// (RS, E, D4, D5, D6, D7)
+LiquidCrystal lcd(7, 8, 9, 10, 11, 12);  
+
+//Declaramos
+void setup()
+{
+  myservo.attach(A1);  
+  Serial.begin(9600);
+  pinMode(led_roja, OUTPUT);
+  pinMode(led_amarilla, OUTPUT);
+  lcd.begin(16, 2);
+  irrecv.enableIRIn();
+}
+
+//Funcion principal
+void loop()
+{
+  if (prendido_apagado)
+  {
+    int lectura_sensor = analogRead(sensor_temperatura);
+    //Temperatura a numero entero
+    float temperatura_ambiente = (lectura_sensor * 5.0 / 1024.0 - 0.5) * 100.0;
+	
+    //Configuracion del lcd columna x fila y printeo de temperatura
+    lcd.setCursor(0, 0);
+    lcd.print("Temperatura: ");
+    lcd.print(temperatura_ambiente);
+    delay(500);
+
+    //Estaciones
+    detectar_estacion(temperatura_ambiente);
+
+    //Temperatura
+    if (temperatura_ambiente > 60)
+    {
+      mover_servo();
+      ALERTA(led_roja,led_amarilla);
+    }
+    else
+    {
+      frenar_servo();
+    }
+	//Funcionalidad al precionar boton
+    if (IrReceiver.decode()) 
+    {
+      Serial.println(IrReceiver.decodedIRData.decodedRawData, HEX);
+      IrReceiver.resume();
+      switch (IrReceiver.decodedIRData.decodedRawData)
+      {
+        //Numero de pin presionado pasado a numero
+        case 4278238976:
+          prendido_apagado = false;
+        //Inicializamos el LCD sin texto
+          lcd.setCursor(0, 0);
+          lcd.print("                ");
+          lcd.setCursor(0, 1);
+          lcd.print("                ");
+          break;
+      }
+      delay(50);
+      //Reanuda Señales
+      irrecv.resume();
+    }
+  }
+  else
+  {
+    if (IrReceiver.decode()) 
+    {
+        Serial.println(IrReceiver.decodedIRData.decodedRawData, HEX);
+        IrReceiver.resume();
+        switch (IrReceiver.decodedIRData.decodedRawData)
+        {
+            case 4278238976:
+              prendido_apagado = true;
+              break;
+        }
+        delay(50);
+        irrecv.resume();
+    }
+  }
+}
+
+//ALERTA de incendio
+void ALERTA(int led_alerta1, int led_alerta2) 
+{
+  
+  for (int i = 0; i < 10; i++) 
+  {
+    digitalWrite(led_alerta1, HIGH);
+    digitalWrite(led_alerta2, HIGH);
+    delay(200);
+    digitalWrite(led_alerta1, LOW);
+    digitalWrite(led_alerta2, LOW);
+    delay(200);
+  }
+  digitalWrite(led_alerta1, LOW);
+  digitalWrite(led_alerta2, LOW);
+}
+
+//Estaciones printeadas en el LCD
+void detectar_estacion(int temperatura_ambiente)
+{
+  lcd.setCursor(0, 1);
+  lcd.print("Es: ");
+  
+  if (temperatura_ambiente <= 10)
+  {
+    lcd.print("Invierno");
+  }
+  else if (temperatura_ambiente > 10 && temperatura_ambiente <= 18)
+  {
+    lcd.print("Primavera");
+  }
+  else if (temperatura_ambiente > 20 && temperatura_ambiente <= 28)
+  {
+    lcd.print("Otonio");
+  }
+  else if(temperatura_ambiente >= 29 && temperatura_ambiente <= 60)
+  {
+    lcd.print("Verano");
+  }
+  else
+  {
+    lcd.print("Incendio!");
+    ALERTA(led_roja,led_amarilla);
+  }
+  lcd.print("             ");
+}
+
+// Movimiento del servo
+void mover_servo()
+{
+  posicion = 0;
+  myservo.write(posicion);
+  delay(500);
+
+  posicion = 180;
+  myservo.write(posicion);
+  delay(500);
+}
+
+//Frenado del servo
+void frenar_servo()
+{
+  posicion = 0;
+  myservo.write(posicion);
+  delay(500);
+}
