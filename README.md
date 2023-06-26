@@ -8,7 +8,7 @@
 
 ## Primer Parcial Imagen
 
-![IMAGEN DEL PROYECTO](https://i.im.ge/2023/05/22/huyBpK.Thomas-Szymuda-Primer-Parcial-1D-2da-parte.png)
+![IMAGEN DEL PROYECTO](https://i.im.ge/2023/06/26/02xHyP.Thomas-Szymuda-2do-Examen.png)
 
 ## DESCRIPCIÓN
 
