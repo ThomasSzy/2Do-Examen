@@ -53,4 +53,4 @@ void loop()
 
 ## LINK AL PROYECTO
 
-* [proyecto]([https://www.tinkercad.com/things/6BF41HWbKdh-thomas-szymuda-primer-parcial-1d-2da-parte/editel?sharecode=j1t7L0mCwZHAHJ7sLT90PhgmqMOtqBD3v6Q0VHM9R38](https://www.tinkercad.com/things/3OqKFXLHK63-neat-migelo-tumelo/editel?sharecode=35iUkX6Nvwl1Q3nP32ijyF-pohKsQrJKgRG5jeW5BJY)https://www.tinkercad.com/things/3OqKFXLHK63-neat-migelo-tumelo/editel?sharecode=35iUkX6Nvwl1Q3nP32ijyF-pohKsQrJKgRG5jeW5BJY)
+* [proyecto](https://www.tinkercad.com/things/3OqKFXLHK63-neat-migelo-tumelo/editel?sharecode=35iUkX6Nvwl1Q3nP32ijyF-pohKsQrJKgRG5jeW5BJY)
